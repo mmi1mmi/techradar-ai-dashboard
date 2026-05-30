@@ -1,8 +1,18 @@
 # TechRadar AI
 
-TechRadar AI to dashboard webowy do monitorowania sygnałów technologicznych z obszarów AI, telekomunikacji, cyberbezpieczeństwa, chmury, hardware i VoIP. Aplikacja prezentuje aktualne informacje w formie kart, statystyk, zapisanych artykułów oraz wykresu radarowego pokazującego rozkład tematów.
+## Linki do projektu
 
-Projekt został przygotowany jako aplikacja React + Vite z naciskiem na czytelny interfejs, tryb demo bez zależności od API oraz tryb live API pobierający dane z Hacker News Algolia API.
+Repozytorium GitHub:
+https://github.com/mmi1mmi/techradar-ai-dashboard
+
+Wersja online:
+https://techradar-ai-dashboard.vercel.app/
+
+## Opis projektu
+
+TechRadar AI to webowy dashboard do monitorowania sygnałów technologicznych z obszarów AI, telekomunikacji, cyberbezpieczeństwa, chmury, hardware'u i VoIP. Aplikacja prezentuje aktualne informacje w formie kart, statystyk, zapisanych artykułów oraz wykresu radarowego pokazującego rozkład tematów.
+
+Projekt został przygotowany jako aplikacja React + Vite. Główny nacisk położono na czytelny interfejs, tryb demo niewymagający zewnętrznego API oraz tryb live API, który pobiera dane z Hacker News Algolia API.
 
 ## Technologie
 
@@ -84,11 +94,11 @@ Tryb demo bez wywołań API:
 VITE_NEWS_MODE=mock
 ```
 
-Jeżeli live API zwróci błąd albo nie będzie dostępne, aplikacja automatycznie przechodzi na fallback danych lokalnych.
+Jeżeli live API zwróci błąd albo nie będzie dostępne, aplikacja automatycznie przejdzie na fallback danych lokalnych.
 
 ## Ocena
 
-Projekt był realizowany z myślą o ocenie bardzo dobrej (5.0). Zakres wykracza poza prostą listę danych, ponieważ zawiera integrację API, fallback, filtrowanie, zapisywanie stanu lokalnie, motyw jasny/ciemny oraz wizualizację danych.
+Projekt był realizowany z myślą o ocenie bardzo dobrej (4.5). Zakres wykracza poza prostą listę danych, ponieważ zawiera integrację API, fallback, filtrowanie, zapisywanie stanu lokalnie, motyw jasny/ciemny oraz wizualizację danych.
 
 ## Elementy ponad poziom podstawowy
 
@@ -114,4 +124,4 @@ src/
 
 ## Przygotowanie do GitHub
 
-Projekt zawiera `.gitignore`, który wyklucza m.in. `node_modules`, `dist`, `.env` i `.cache`. Przed wysłaniem na GitHub należy dodać repozytorium zdalne, wykonać commit i uzupełnić link w pliku `CHECKLISTA_ODDANIA.md`.
+Projekt zawiera `.gitignore`, który wyklucza m.in. `node_modules`, `dist`, `.env` i `.cache`. Przed wysłaniem na GitHub należy wykonać commit oraz upewnić się, że dokumentacja i plik `CHECKLISTA_ODDANIA.md` zawierają aktualne linki do repozytorium i wersji online.
