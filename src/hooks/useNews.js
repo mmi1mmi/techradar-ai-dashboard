@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { fetchNewsSignals } from "../services/newsApi";
 
-export function useNews({ query = "", category = "all" } = {}) {
+export function useNews({ query = "" } = {}) {
   const [payload, setPayload] = useState({
     categories: [],
     categoryColors: {},
@@ -19,7 +19,7 @@ export function useNews({ query = "", category = "all" } = {}) {
     setStatus("loading");
     setError(null);
 
-    fetchNewsSignals({ query, category, signal: controller.signal })
+    fetchNewsSignals({ query, signal: controller.signal })
       .then((data) => {
         if (!active) return;
         setPayload(data);
@@ -37,7 +37,7 @@ export function useNews({ query = "", category = "all" } = {}) {
       active = false;
       controller.abort();
     };
-  }, [category, query]);
+  }, [query]);
 
   const counts = useMemo(() => {
     const base = { all: payload.news.length };

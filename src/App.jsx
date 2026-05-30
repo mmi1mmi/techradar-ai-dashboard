@@ -15,7 +15,7 @@ import { useDebounce } from "./hooks/useDebounce";
 import { useDashboardTweaks } from "./hooks/useDashboardTweaks";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import { useNews } from "./hooks/useNews";
-import { useNewsFilters } from "./hooks/useNewsFilters";
+import { useNewsCounts, useNewsFilters } from "./hooks/useNewsFilters";
 import { useTheme } from "./hooks/useTheme";
 
 export function App() {
@@ -26,12 +26,13 @@ export function App() {
   const [savedIds, setSavedIds] = useLocalStorage("tr_saved", []);
   const [openArticle, setOpenArticle] = useState(null);
   const debouncedQuery = useDebounce(query, 350);
-  const { categories, categoryColors, news, radarData, counts, status, source, error } = useNews({
+  const { categories, categoryColors, news, radarData, status, source, error } = useNews({
     query: debouncedQuery,
-    category: activeCategory,
   });
 
-  const filteredNews = useNewsFilters(news, source === "mock" ? activeCategory : "all", source === "mock" ? debouncedQuery : "");
+  const localQuery = source === "mock" ? debouncedQuery : "";
+  const counts = useNewsCounts(news, localQuery);
+  const filteredNews = useNewsFilters(news, activeCategory, localQuery);
   const trimmedQuery = query.trim();
   const hotArticle = news.find((item) => item.hot);
   const showHero = activeCategory === "all" && !debouncedQuery.trim() && hotArticle;
@@ -113,7 +114,11 @@ export function App() {
           ) : filteredNews.length === 0 ? (
             <div className="card state-card">
               <Search size={29} strokeWidth={1.5} />
-              <span className="mono">Brak sygnalow dla tego filtra</span>
+              <span className="mono">
+                {activeCategory === "all"
+                  ? "Brak sygnalow dla tego filtra"
+                  : "Brak sygnałów w tej kategorii dla aktualnego zapytania. Spróbuj All Signals albo zmień hasło."}
+              </span>
             </div>
           ) : (
             <motion.section className="dashboard-grid" layout>

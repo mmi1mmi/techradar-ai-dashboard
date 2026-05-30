@@ -1,3 +1,4 @@
+import { categoryKeywords } from "../data/categoryKeywords";
 import { news as mockNews } from "../data/mockNews";
 
 const HN_API_URL = "https://hn.algolia.com/api/v1/search_by_date";
@@ -23,29 +24,11 @@ export const categoryColors = {
   voip: "#34d399",
 };
 
-const categoryQueries = {
-  ai: "AI artificial intelligence machine learning LLM OpenAI model agents",
-  telecom: "telecom 5G 6G network broadband fiber satellite carrier",
-  security: "cybersecurity security CVE vulnerability breach ransomware exploit",
-  cloud: "cloud AWS Azure GCP Kubernetes serverless infrastructure",
-  hardware: "hardware chip semiconductor GPU CPU NPU datacenter silicon",
-  voip: "VoIP SIP WebRTC PBX Asterisk telephony voice",
-};
-
-const categoryKeywords = {
-  ai: ["ai", "artificial intelligence", "machine learning", "llm", "openai", "model", "agent", "neural"],
-  telecom: ["telecom", "5g", "6g", "network", "broadband", "fiber", "satellite", "carrier", "radio"],
-  security: ["security", "cyber", "cve", "vulnerability", "breach", "ransomware", "exploit", "malware"],
-  cloud: ["cloud", "aws", "azure", "gcp", "kubernetes", "serverless", "infrastructure", "datacenter"],
-  hardware: ["hardware", "chip", "semiconductor", "gpu", "cpu", "npu", "silicon", "device"],
-  voip: ["voip", "sip", "webrtc", "pbx", "asterisk", "telephony", "voice", "call"],
-};
-
-const defaultQuery = Object.values(categoryQueries).join(" ");
+const defaultQuery = Object.values(categoryKeywords).flat().join(" ");
 
 const sleep = (ms) => new Promise((resolve) => window.setTimeout(resolve, ms));
 
-export async function fetchNewsSignals({ query = "", category = "all", signal } = {}) {
+export async function fetchNewsSignals({ query = "", signal } = {}) {
   const mode = import.meta.env.VITE_NEWS_MODE || "live";
 
   if (mode === "mock") {
@@ -54,7 +37,7 @@ export async function fetchNewsSignals({ query = "", category = "all", signal } 
   }
 
   try {
-    const payload = await fetchHackerNewsSignals({ query, category, signal });
+    const payload = await fetchHackerNewsSignals({ query, signal });
     return {
       ...payload,
       source: "api",
@@ -72,8 +55,8 @@ export async function fetchNewsSignals({ query = "", category = "all", signal } 
   }
 }
 
-async function fetchHackerNewsSignals({ query, category, signal }) {
-  const url = buildAlgoliaUrl({ query, category });
+async function fetchHackerNewsSignals({ query, signal }) {
+  const url = buildAlgoliaUrl({ query });
   const response = await fetch(url, {
     headers: { Accept: "application/json" },
     signal,
@@ -89,9 +72,8 @@ async function fetchHackerNewsSignals({ query, category, signal }) {
     throw new Error("Unexpected Hacker News API response");
   }
 
-  const preferredCategory = category === "all" ? null : category;
   const news = data.hits
-    .map((hit, index) => mapHitToSignal(hit, index, preferredCategory))
+    .map((hit, index) => mapHitToSignal(hit, index))
     .filter(Boolean);
 
   if (news.length > 0) {
@@ -106,10 +88,9 @@ async function fetchHackerNewsSignals({ query, category, signal }) {
   };
 }
 
-function buildAlgoliaUrl({ query, category }) {
+function buildAlgoliaUrl({ query }) {
   const url = new URL(import.meta.env.VITE_NEWS_API_URL || HN_API_URL);
-  const categoryQuery = category === "all" ? "" : categoryQueries[category] || "";
-  const searchQuery = [query.trim(), categoryQuery].filter(Boolean).join(" ") || defaultQuery;
+  const searchQuery = query.trim() || defaultQuery;
 
   url.searchParams.set("query", searchQuery);
   url.searchParams.set("tags", "story");
@@ -118,14 +99,14 @@ function buildAlgoliaUrl({ query, category }) {
   return url;
 }
 
-function mapHitToSignal(hit, index, preferredCategory) {
+function mapHitToSignal(hit, index) {
   const title = hit.title || hit.story_title;
   if (!title) return null;
 
   const cleanStoryText = stripHtml(hit.story_text || hit.comment_text || "");
   const url = hit.url || `https://news.ycombinator.com/item?id=${hit.objectID}`;
   const textForCategory = `${title} ${cleanStoryText} ${url}`;
-  const cat = preferredCategory || inferCategory(textForCategory) || "cloud";
+  const cat = inferCategory(textForCategory) || "cloud";
   const points = Number(hit.points || 0);
   const comments = Number(hit.num_comments || 0);
   const score = Math.max(points, comments, 1);
@@ -134,6 +115,7 @@ function mapHitToSignal(hit, index, preferredCategory) {
     id: `hn-${hit.objectID}`,
     cat,
     title,
+    description: cleanStoryText,
     summary: buildSummary({ cleanStoryText, source: getSource(url), points, comments }),
     source: getSource(url),
     time: formatTimeAgo(hit.created_at),
@@ -142,6 +124,7 @@ function mapHitToSignal(hit, index, preferredCategory) {
     live: isLive(hit.created_at) || index < 3,
     url,
     hnUrl: `https://news.ycombinator.com/item?id=${hit.objectID}`,
+    tags: hit._tags || [],
   };
 }
 
